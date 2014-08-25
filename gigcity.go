@@ -1,7 +1,7 @@
 package gigcity
 
 import (
-	"fmt"
+	"html/template"
 	"net/http"
 )
 
@@ -10,5 +10,12 @@ func init() {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello world!")
+	page := template.Must(template.ParseFiles(
+		"static/_base.html",
+		"static/index.html",
+	))
+
+	if err := page.Execute(w, nil); err != nil {
+		panic(err)
+	}
 }
