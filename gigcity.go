@@ -6,6 +6,10 @@ import (
 )
 
 func init() {
+	// handle static paths
+	http.Handle("/static/img/", http.StripPrefix("/static/img/", http.FileServer(http.Dir("static/img"))))
+
+	// hondle application paths
 	http.HandleFunc("/", rootHandler)
 }
 
