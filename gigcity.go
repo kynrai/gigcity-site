@@ -10,6 +10,7 @@ func init() {
 	http.Handle("/static/img/", http.StripPrefix("/static/img/", http.FileServer(http.Dir("static/img"))))
 
 	// hondle application paths
+	http.HandleFunc("/about", aboutHandler)
 	http.HandleFunc("/", rootHandler)
 }
 
@@ -48,6 +49,18 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	page := template.Must(template.ParseFiles(
 		"static/_base.html",
 		"static/index.html",
+	))
+
+	if err := page.Execute(w, nil); err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+}
+
+func aboutHandler(w http.ResponseWriter, r *http.Request) {
+	page := template.Must(template.ParseFiles(
+		"static/_base.html",
+		"static/about.html",
 	))
 
 	if err := page.Execute(w, nil); err != nil {
