@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"time"
 
 	"appengine"
 	"appengine/datastore"
@@ -139,6 +140,18 @@ func eventHandler(w http.ResponseWriter, r *http.Request) {
 	if _, err := q.GetAll(c, &events); err != nil {
 		errorHandler(w, r, http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	// loop through events, changing events.Datetime from YYYY-MM-DDTHH:MM
+	// to YYYY-MM-DD HH:MM
+	for key, event := range events {
+		t, err := time.Parse("2006-01-02T15:04", event.Datetime)
+		if err != nil {
+			errorHandler(w, r, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		events[key].Datetime = t.Format("2006-01-02 03:04 PM")
 	}
 
 	page := template.Must(template.ParseFiles(
