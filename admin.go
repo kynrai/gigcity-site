@@ -51,6 +51,7 @@ func addEventHandler(w http.ResponseWriter, r *http.Request) {
 		g := Event{
 			Title:    r.FormValue("title"),
 			Datetime: r.FormValue("date"),
+			Location: r.FormValue("location"),
 			Details:  r.FormValue("details"),
 		}
 

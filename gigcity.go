@@ -17,6 +17,8 @@ type Event struct {
 	// Datetime of the event, sent from the browser in YYYY-MM-DDTHH:MM
 	// format
 	Datetime string
+	// Location is the location the event is being held
+	Location string
 	// The details about the event
 	Details string
 }
