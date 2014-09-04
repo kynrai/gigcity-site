@@ -1,0 +1,12 @@
+{{ define "content" }}
+  <div class="panel panel-default">
+    <div class="panel-heading">Admin Actions</div>
+    <div class="panel-body">
+      <div class="btn-group">
+        <a href="/admin" class="btn btn-default">Admin Home</a>
+        <a href="/admin/events/add" class="btn btn-default">Create Event</a>
+      </div>
+    </div>
+  </div>
+  {{ template "admin" . }}
+{{ end }}
