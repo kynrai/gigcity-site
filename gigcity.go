@@ -2,41 +2,36 @@ package gigcity
 
 import (
 	"html/template"
+	"log"
 	"net/http"
-	"time"
 
-	"appengine"
-	"appengine/datastore"
+	"github.com/bmizerany/pat"
 )
-
-// Event contains details about GDG events, used when preforming read/write ops
-// to the datastore
-type Event struct {
-	// Title of the event
-	Title string
-	// Datetime of the event, sent from the browser in YYYY-MM-DDTHH:MM
-	// format
-	Datetime string
-	// The details about the event
-	Details string
-}
 
 // Under appengine our code runs as a package, not a binary.  Due to this
 // define the routes during package initilization.  Normally this wourd happen
 // with in main()
 func init() {
 	// hondle application paths
-	http.HandleFunc("/admin/events/add", addEventHandler)
-	http.HandleFunc("/admin", adminRootHandler)
-	http.HandleFunc("/events", eventHandler)
-	http.HandleFunc("/about", aboutHandler)
-	http.HandleFunc("/", rootHandler)
+	m := pat.New()
+	m.Get("/admin/location/add", http.HandlerFunc(addLocationHandler))
+	m.Post("/admin/location/add", http.HandlerFunc(addLocationHandler))
+	m.Get("/admin/location", http.HandlerFunc(locationHandler))
+	m.Get("/admin/events/add", http.HandlerFunc(addEventHandler))
+	m.Post("/admin/events/add", http.HandlerFunc(addEventHandler))
+	m.Get("/admin", http.HandlerFunc(adminRootHandler))
+	m.Get("/events/:event", http.HandlerFunc(getEventHandler))
+	m.Get("/events", http.HandlerFunc(eventHandler))
+	m.Get("/about", http.HandlerFunc(aboutHandler))
+	m.Get("/", http.HandlerFunc(rootHandler))
+	http.Handle("/", m)
 }
 
 // Handle errors here, this allows us to control the format of the output rather
 // than using http.Error() defaults
 func errorHandler(w http.ResponseWriter, r *http.Request, status int, err string) {
 	w.WriteHeader(status)
+	log.Println(err)
 	switch status {
 	case http.StatusNotFound:
 		page := template.Must(template.ParseFiles(
@@ -61,11 +56,6 @@ func errorHandler(w http.ResponseWriter, r *http.Request, status int, err string
 			return
 		}
 	}
-}
-
-// Fetches the next index key out of the datastore for the Events entity
-func eventList(c appengine.Context) *datastore.Key {
-	return datastore.NewKey(c, "Events", "default_eventlist", 0, nil)
 }
 
 // Handles requests to '/' as well as any unmatched routes to the server
@@ -95,43 +85,6 @@ func aboutHandler(w http.ResponseWriter, r *http.Request) {
 	))
 
 	if err := page.Execute(w, nil); err != nil {
-		errorHandler(w, r, http.StatusInternalServerError, err.Error())
-		return
-	}
-}
-
-// Handles requests to /events
-func eventHandler(w http.ResponseWriter, r *http.Request) {
-	// use the request information to determine if this is a new session
-	c := appengine.NewContext(r)
-	// query the Events entity in the datastore
-	q := datastore.NewQuery("Events").Ancestor(eventList(c)).Order("-Datetime").Limit(10)
-	// create a slice of Event with a capacity of 10 items
-	events := make([]Event, 0, 10)
-	// store the results into the events slice
-	if _, err := q.GetAll(c, &events); err != nil {
-		errorHandler(w, r, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// loop through events, changing events.Datetime from YYYY-MM-DDTHH:MM
-	// to YYYY-MM-DD HH:MM
-	for key, event := range events {
-		t, err := time.Parse("2006-01-02T15:04", event.Datetime)
-		if err != nil {
-			errorHandler(w, r, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		events[key].Datetime = t.Format("2006-01-02 03:04 PM")
-	}
-
-	page := template.Must(template.ParseFiles(
-		"static/_base.html",
-		"static/events.html",
-	))
-
-	if err := page.Execute(w, events); err != nil {
 		errorHandler(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}

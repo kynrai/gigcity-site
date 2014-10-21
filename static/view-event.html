@@ -1,0 +1,44 @@
+{{ define "content" }}
+  <div class="page-header">
+    <h1>{{ .EventDetails.Title }}</h1>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12 col-md-5">
+      <div class="thumbnail">
+        <div class="caption">
+          <h2>When & Where</h2>
+          <p><span class="glyphicon glyphicon-calendar"></span> When: {{ .EventDetails.Datetime }} Eastern<br />
+          <span class="glyphicon glyphicon-map-marker"></span> Where: {{ .LocDetails.Address }}</p>
+          <p>How to find us: {{ .LocDetails.Details }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-md-7">
+      <div class="thumbnail">
+        <div class="caption">
+          <h2>Links</h2>
+          <ul>
+            <li><a href="{{ .EventDetails.GooglePlus }}" target="_blank">Google+ Event Page</a></li>
+          </ul>
+          {{ if .EventDetails.HoA }}
+          <h3>Hangout on Air</h3>
+          <div class="embed-responsive embed-responsive-16by9">
+            <iframe class="embed-responsive-item" src="{{ .EventDetails.HoA }}"></iframe>
+          </div>
+          {{ end }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="thumbnail">
+        <div class="caption">
+          <h2>Details</h2>
+          <p>{{ .EventDetails.Details }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{{ end }}
