@@ -3,6 +3,7 @@ package gigcity
 import (
 	"html/template"
 	"net/http"
+	"strings"
 )
 
 // Admin landing page
@@ -17,4 +18,8 @@ func adminRootHandler(w http.ResponseWriter, r *http.Request) {
 		errorHandler(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
+}
+
+func getID(n string) string {
+	return strings.ToLower(strings.Replace(n, " ", "-", -1))
 }

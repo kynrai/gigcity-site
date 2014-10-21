@@ -3,6 +3,7 @@ package gigcity
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"time"
 
@@ -14,13 +15,15 @@ import (
 // Event contains details about GDG events, used when preforming read/write ops
 // to the datastore
 type Event struct {
+	// ID is the unique ID (URI) for the event
+	ID string
 	// Title of the event
 	Title string
 	// Datetime of the event, sent from the browser in YYYY-MM-DDTHH:MM
 	// format
 	Datetime string
-	// Location is the location the event is being held
-	Location string
+	// LocID is the location the event is being held
+	LocID string
 	// GooglePlus is the URL to the Google+ event page
 	GooglePlus string
 	// The details about the event
@@ -93,13 +96,37 @@ func addEventHandler(w http.ResponseWriter, r *http.Request) {
 	// check the request method
 	if r.Method == "POST" {
 		// handle post requests
-		g := Event{
-			Title:      r.FormValue("title"),
-			Datetime:   r.FormValue("date"),
-			Location:   r.FormValue("location"),
-			GooglePlus: r.FormValue("gplus"),
-			Details:    r.FormValue("details"),
+		var g Event
+		g.Title = r.FormValue("title")
+		if g.Title == "" {
+			errorHandler(w, r, http.StatusBadRequest, "event title is required")
+			return
 		}
+
+		g.Datetime = r.FormValue("date")
+		if g.Datetime == "" {
+			errorHandler(w, r, http.StatusBadRequest, "event date and time is required")
+			return
+		}
+
+		g.LocID = r.FormValue("location")
+		if g.LocID == "" {
+			errorHandler(w, r, http.StatusBadRequest, "event location is required")
+			return
+		}
+
+		g.GooglePlus = r.FormValue("gplus")
+		if g.GooglePlus == "" {
+			errorHandler(w, r, http.StatusBadRequest, "Google+ event page is required")
+			return
+		}
+
+		g.Details = r.FormValue("details")
+		if g.Details == "" {
+			errorHandler(w, r, http.StatusBadRequest, "Event details is required")
+			return
+		}
+		g.ID = getID(g.Title)
 
 		// get the next available index key
 		key := datastore.NewIncompleteKey(c, "Events", eventList(c))
@@ -126,5 +153,64 @@ func addEventHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		fmt.Fprint(w, r.Method)
+	}
+}
+
+func getEventHandler(w http.ResponseWriter, r *http.Request) {
+	type Content struct {
+		EventDetails Event
+		LocDetails   Location
+	}
+
+	var context Content
+	c := appengine.NewContext(r)
+	eventID := r.URL.Query().Get(":event")
+	if eventID == "" {
+		errorHandler(w, r, http.StatusInternalServerError, "no event ID found in URL")
+		return
+	}
+
+	q := datastore.NewQuery("Events").Filter("ID =", eventID)
+	t := q.Run(c)
+	for {
+		var e Event
+		_, err := t.Next(&e)
+		if err == datastore.Done {
+			break
+		}
+		if err != nil {
+			c.Errorf("fetching event details failed: %v", err)
+			break
+		}
+
+		context.EventDetails = e
+	}
+
+	q = datastore.NewQuery("Locations").Filter("ID =", context.EventDetails.LocID)
+	t = q.Run(c)
+	for {
+		var l Location
+		_, err := t.Next(&l)
+		if err == datastore.Done {
+			break
+		}
+		if err != nil {
+			c.Errorf("fetching location details failed: %v", err)
+			break
+		}
+
+		context.LocDetails = l
+	}
+
+	log.Printf("%#v\n", context)
+
+	page := template.Must(template.ParseFiles(
+		"static/_base.html",
+		"static/view-event.html",
+	))
+
+	if err := page.Execute(w, context); err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err.Error())
+		return
 	}
 }

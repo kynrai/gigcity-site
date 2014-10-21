@@ -3,7 +3,6 @@ package gigcity
 import (
 	"html/template"
 	"net/http"
-	"strings"
 
 	"appengine"
 	"appengine/datastore"
@@ -115,7 +114,7 @@ func addLocationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		loc.Details = r.FormValue("details")
-		loc.ID = locID(loc.Name)
+		loc.ID = getID(loc.Name)
 
 		key := datastore.NewIncompleteKey(c, "Locations", locationList(c))
 		_, err := datastore.Put(c, key, &loc)
@@ -126,8 +125,4 @@ func addLocationHandler(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, "/admin/location", http.StatusFound)
 	}
-}
-
-func locID(n string) string {
-	return strings.ToLower(strings.Replace(n, " ", "-", -1))
 }
