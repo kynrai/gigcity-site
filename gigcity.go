@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/bmizerany/pat"
 )
 
 // Under appengine our code runs as a package, not a binary.  Due to this
@@ -11,13 +13,17 @@ import (
 // with in main()
 func init() {
 	// hondle application paths
-	http.HandleFunc("/admin/location", locationHandler)
-	http.HandleFunc("/admin/location/add", addLocationHandler)
-	http.HandleFunc("/admin/events/add", addEventHandler)
-	http.HandleFunc("/admin", adminRootHandler)
-	http.HandleFunc("/events", eventHandler)
-	http.HandleFunc("/about", aboutHandler)
-	http.HandleFunc("/", rootHandler)
+	m := pat.New()
+	m.Get("/admin/location/add", http.HandlerFunc(addLocationHandler))
+	m.Post("/admin/location/add", http.HandlerFunc(addLocationHandler))
+	m.Get("/admin/location", http.HandlerFunc(locationHandler))
+	m.Get("/admin/events/add", http.HandlerFunc(addEventHandler))
+	m.Post("/admin/events/add", http.HandlerFunc(addEventHandler))
+	m.Get("/admin", http.HandlerFunc(adminRootHandler))
+	m.Get("/events", http.HandlerFunc(eventHandler))
+	m.Get("/about", http.HandlerFunc(aboutHandler))
+	m.Get("/", http.HandlerFunc(rootHandler))
+	http.Handle("/", m)
 }
 
 // Handle errors here, this allows us to control the format of the output rather
