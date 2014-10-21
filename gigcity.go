@@ -2,6 +2,7 @@ package gigcity
 
 import (
 	"html/template"
+	"log"
 	"net/http"
 )
 
@@ -23,6 +24,7 @@ func init() {
 // than using http.Error() defaults
 func errorHandler(w http.ResponseWriter, r *http.Request, status int, err string) {
 	w.WriteHeader(status)
+	log.Println(err)
 	switch status {
 	case http.StatusNotFound:
 		page := template.Must(template.ParseFiles(
