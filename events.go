@@ -28,6 +28,8 @@ type Event struct {
 	GooglePlus string
 	// The details about the event
 	Details string
+	// HoA is the Hangouts on Air link
+	HoA string
 }
 
 // Fetches the next index key out of the datastore for the Events entity
@@ -126,6 +128,8 @@ func addEventHandler(w http.ResponseWriter, r *http.Request) {
 			errorHandler(w, r, http.StatusBadRequest, "Event details is required")
 			return
 		}
+
+		g.HoA = r.FormValue("hoa")
 		g.ID = getID(g.Title)
 
 		// get the next available index key
