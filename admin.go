@@ -49,10 +49,11 @@ func addEventHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		// handle post requests
 		g := Event{
-			Title:    r.FormValue("title"),
-			Datetime: r.FormValue("date"),
-			Location: r.FormValue("location"),
-			Details:  r.FormValue("details"),
+			Title:      r.FormValue("title"),
+			Datetime:   r.FormValue("date"),
+			Location:   r.FormValue("location"),
+			GooglePlus: r.FormValue("gplus"),
+			Details:    r.FormValue("details"),
 		}
 
 		// get the next available index key

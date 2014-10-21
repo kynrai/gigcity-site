@@ -19,6 +19,8 @@ type Event struct {
 	Datetime string
 	// Location is the location the event is being held
 	Location string
+	// GooglePlus is the URL to the Google+ event page
+	GooglePlus string
 	// The details about the event
 	Details string
 }
