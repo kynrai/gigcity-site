@@ -3,7 +3,6 @@ package gigcity
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"time"
 
@@ -205,8 +204,6 @@ func getEventHandler(w http.ResponseWriter, r *http.Request) {
 
 		context.LocDetails = l
 	}
-
-	log.Printf("%#v\n", context)
 
 	page := template.Must(template.ParseFiles(
 		"static/_base.html",
