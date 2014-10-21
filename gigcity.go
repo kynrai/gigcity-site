@@ -30,6 +30,8 @@ type Event struct {
 // with in main()
 func init() {
 	// hondle application paths
+	http.HandleFunc("/admin/location", locationHandler)
+	http.HandleFunc("/admin/location/add", addLocationHandler)
 	http.HandleFunc("/admin/events/add", addEventHandler)
 	http.HandleFunc("/admin", adminRootHandler)
 	http.HandleFunc("/events", eventHandler)

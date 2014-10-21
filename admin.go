@@ -2,8 +2,8 @@ package gigcity
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
-	"text/template"
 
 	"appengine"
 	"appengine/datastore"
