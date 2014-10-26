@@ -13,5 +13,9 @@ handlers:
   script: _go_app
   login: admin
 
+- url: /robots.txt
+  static_files: /static/robots.txt
+  upload: /static/robots.txt
+
 - url: /.*
   script: _go_app
