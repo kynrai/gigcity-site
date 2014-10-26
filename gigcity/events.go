@@ -159,6 +159,7 @@ func addEventHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// geteventhandler handles requests for /events/:event
 func getEventHandler(w http.ResponseWriter, r *http.Request) {
 	type Content struct {
 		EventDetails Event
@@ -186,6 +187,14 @@ func getEventHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
+		// format the datestamp
+		t, err := time.Parse("2006-01-02T15:04", e.Datetime)
+		if err != nil {
+			errorHandler(w, r, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		e.Datetime = t.Format("2006-01-02 3:04 PM")
 		context.EventDetails = e
 	}
 
