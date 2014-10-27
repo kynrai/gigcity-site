@@ -1,9 +1,9 @@
 application: gdg-gigcity
-version: 1
+version: 1a
 runtime: go
 api_version: go1
 
-default_expiration: "4d 5h"
+default_expiration: "30d"
 
 handlers:
 - url: /static/img
@@ -13,9 +13,10 @@ handlers:
   script: _go_app
   login: admin
 
-- url: /robots.txt
-  static_files: /static/robots.txt
-  upload: /static/robots.txt
+- url: /(.*\.txt)
+  mime_type: text/plain
+  static_files: /static/\1
+  upload: /static/(.*\.txt)
 
 - url: /.*
   script: _go_app
