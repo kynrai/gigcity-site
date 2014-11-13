@@ -22,6 +22,7 @@ func init() {
 	m.Get("/admin/events/add", http.HandlerFunc(addEventHandler))
 	m.Post("/admin/events/add", http.HandlerFunc(addEventHandler))
 	m.Get("/admin", http.HandlerFunc(adminRootHandler))
+	m.Get("/learning", http.HandlerFunc(learningHandler))
 	m.Get("/events/:event", http.HandlerFunc(getEventHandler))
 	m.Get("/events", http.HandlerFunc(eventHandler))
 	m.Get("/about", http.HandlerFunc(aboutHandler))
