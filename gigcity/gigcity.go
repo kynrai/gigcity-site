@@ -1,9 +1,11 @@
 package gigcity
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/bmizerany/pat"
 )
@@ -27,13 +29,36 @@ func init() {
 	http.Handle("/", m)
 }
 
+// Handle messages that should be written out to the log.  lvl is the level of the message
+// and msg contains the message body
+func logHandler(lvl, msg string) {
+	// switch on message log level
+	// TODO work out a good way to see if this is running in a dev
+	// environment
+	switch lvl {
+	case "INFO":
+		log.Print("[INFO]: " + logTime() + " " + msg)
+	case "WARN":
+		log.Print("[WARNING]: " + logTime() + " " + msg)
+	case "ERROR":
+		log.Print("[ERROR]: " + logTime() + " " + msg)
+	case "FATAL":
+		log.Fatal("[FATEL]: " + logTime() + " " + msg)
+	}
+}
+
+// returns the current time in RFC3339 format
+func logTime() string {
+	return time.Now().Format(time.RFC3339)
+}
+
 // Handle errors here, this allows us to control the format of the output rather
 // than using http.Error() defaults
 func errorHandler(w http.ResponseWriter, r *http.Request, status int, err string) {
 	w.WriteHeader(status)
-	log.Println(err)
 	switch status {
 	case http.StatusNotFound:
+		logHandler("ERROR", fmt.Sprintf("client %s tried to request %v", r.RemoteAddr, r.URL.Path))
 		page := template.Must(template.ParseFiles(
 			"static/_base.html",
 			"static/404.html",
@@ -44,6 +69,7 @@ func errorHandler(w http.ResponseWriter, r *http.Request, status int, err string
 			return
 		}
 	case http.StatusInternalServerError:
+		logHandler("ERROR", fmt.Sprintf("an internal server error occured when %s requested %s with error:\n%s", r.RemoteAddr, r.URL.Path, err))
 		page := template.Must(template.ParseFiles(
 			"static/_base.html",
 			"static/500.html",
