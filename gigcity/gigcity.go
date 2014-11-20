@@ -5,17 +5,23 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/bmizerany/pat"
+	"github.com/yosssi/gcss"
 )
 
 // Under appengine our code runs as a package, not a binary.  Due to this
 // define the routes during package initilization.  Normally this wourd happen
 // with in main()
 func init() {
-	// hondle application paths
 	m := pat.New()
+
+	// handle asset paths
+	m.Get("/css/:file", http.HandlerFunc(compileCSS))
+
+	// hondle application paths
 	m.Get("/admin/location/add", http.HandlerFunc(addLocationHandler))
 	m.Post("/admin/location/add", http.HandlerFunc(addLocationHandler))
 	m.Get("/admin/location", http.HandlerFunc(locationHandler))
@@ -28,6 +34,53 @@ func init() {
 	m.Get("/about", http.HandlerFunc(aboutHandler))
 	m.Get("/", http.HandlerFunc(rootHandler))
 	http.Handle("/", m)
+}
+
+// compileCSS gets the CSS name from the URL, determines if there is a pre-built version
+// and compiles the CSS if need be before serving it to the client
+func compileCSS(w http.ResponseWriter, r *http.Request) {
+	file := r.URL.Query().Get(":file")
+	if file == "" {
+		errorHandler(w, r, http.StatusInternalServerError, "did not get a name of a CSS file")
+		return
+	}
+
+	// TODO find a good way to determine if running on dev server
+	// if a compiled CSS file already exists, serve that
+	_, err := os.Stat("static/css/" + file)
+	if err == nil {
+		http.ServeFile(w, r, "static/css/"+file)
+		return
+	}
+
+	// convert the .css extension to .gcss and build out path to the file
+	f := gcss.Path(file)
+	f = fmt.Sprintf("static/css/%s", f)
+
+	// read the GCSS file
+	css, err := os.Open(f)
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// close out the file resource once done
+	defer func() {
+		if err := css.Close(); err != nil {
+			errorHandler(w, r, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}()
+
+	// set the content type header so browsers will know how to handle it
+	w.Header().Set("Content-Type", "text/css")
+
+	// build out the CSS and serve it to the browser
+	_, err = gcss.Compile(w, css)
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
 }
 
 // Handle messages that should be written out to the log.  lvl is the level of the message
