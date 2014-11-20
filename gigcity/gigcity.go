@@ -38,7 +38,7 @@ func init() {
 
 // compileCSS gets the CSS name from the URL, determines if there is a pre-built version
 // and compiles the CSS if need be before serving it to the client
-func compileCSS(w http.ResonseWriter, r *http.Request) {
+func compileCSS(w http.ResponseWriter, r *http.Request) {
 	file := r.URL.Query().Get(":file")
 	if file == "" {
 		errorHandler(w, r, http.StatusInternalServerError, "did not get a name of a CSS file")
