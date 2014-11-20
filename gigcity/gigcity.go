@@ -22,6 +22,7 @@ func init() {
 	m.Get("/admin/events/add", http.HandlerFunc(addEventHandler))
 	m.Post("/admin/events/add", http.HandlerFunc(addEventHandler))
 	m.Get("/admin", http.HandlerFunc(adminRootHandler))
+	m.Get("/coc", http.HandlerFunc(cocHandler))
 	m.Get("/events/:event", http.HandlerFunc(getEventHandler))
 	m.Get("/events", http.HandlerFunc(eventHandler))
 	m.Get("/about", http.HandlerFunc(aboutHandler))
@@ -111,6 +112,26 @@ func aboutHandler(w http.ResponseWriter, r *http.Request) {
 	))
 
 	if err := page.Execute(w, nil); err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+}
+
+// Handles requests to /coc
+func cocHandler(w http.ResponseWriter, r *http.Request) {
+	type Organizer struct {
+		Name, Role, Email, GooglePlus, IRC string
+	}
+
+	var organizers []Organizer
+	organizers = append(organizers, Organizer{Name: "Adam Jimerson", Role: "Lead Organizer", Email: "vendion@gmail.com", GooglePlus: "https://google.com/+AdamJimerson", IRC: "vendion"})
+
+	page := template.Must(template.ParseFiles(
+		"static/_base.html",
+		"static/coc.html",
+	))
+
+	if err := page.Execute(w, organizers); err != nil {
 		errorHandler(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
