@@ -123,3 +123,58 @@ func addLearningHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+// getLearnHandler handles requests for /learning/:event
+func getLearnHandler(w http.ResponseWriter, r *http.Request) {
+	type Content struct {
+		LearnDetails LearnEvent
+		LocDetails   Location
+	}
+
+	var context Content
+	c := appengine.NewContext(r)
+	groupID := r.URL.Query().Get(":event")
+	if groupID == "" {
+		errorHandler(w, r, http.StatusInternalServerError, "no group ID found in URL")
+		return
+	}
+
+	q := datastore.NewQuery("LearnEvent").Filter("ID =", groupID)
+	t := q.Run(c)
+	for {
+		var g LearnEvent
+		_, err := t.Next(&g)
+		if err != nil {
+			c.Errorf("fetching group details failed: %v", err)
+			break
+		}
+
+		context.LearnDetails = g
+	}
+
+	q = datastore.NewQuery("Locations").Filter("ID =", context.LearnDetails.LocID)
+	t = q.Run(c)
+	for {
+		var l Location
+		_, err := t.Next(&l)
+		if err == datastore.Done {
+			break
+		}
+		if err != nil {
+			c.Errorf("fetching location details failed: %v", err)
+			break
+		}
+
+		context.LocDetails = l
+	}
+
+	page := template.Must(template.ParseFiles(
+		"static/_base.html",
+		"static/view-learn.html",
+	))
+
+	if err := page.Execute(w, context); err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+}

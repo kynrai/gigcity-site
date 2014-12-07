@@ -173,8 +173,7 @@ func getEventHandler(w http.ResponseWriter, r *http.Request) {
 		errorHandler(w, r, http.StatusInternalServerError, "no event ID found in URL")
 		return
 	}
-
-	q := datastore.NewQuery("Events").Filter("ID =", eventID)
+q := datastore.NewQuery("Events").Filter("ID =", eventID)
 	t := q.Run(c)
 	for {
 		var e Event
