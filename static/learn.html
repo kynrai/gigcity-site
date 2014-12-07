@@ -1,4 +1,17 @@
 {{ define "content" }}
   <div class="row">
+    {{ range . }}
+    <div class="col-xs-12 col-md-6">
+      <a href="/learn/{{ .ID }}">
+        <div class="panel panel-default">
+          <div class="panel-heading"><h4><img width="18" height="30" src="/static/img/gdg-chevron.png" />{{ .Title }}</h4></div>
+          <div class="panel-body">
+            <p>Date &amp; Time: {{ .Datetime }}</p>
+            <p class="pull-right">Read More <span class="glyphicon glyphicon-chevron-right"></span></p>
+          </div>
+        </div>
+      </a>
+    </div>
+    {{ end }}
   </div>
 {{ end }}

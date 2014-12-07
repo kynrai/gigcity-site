@@ -22,6 +22,8 @@ func init() {
 	m.Get("/css/:file", http.HandlerFunc(compileCSS))
 
 	// hondle application paths
+	m.Post("/admin/learn/add", http.HandlerFunc(addLearningHandler))
+	m.Get("/admin/learn/add", http.HandlerFunc(addLearningHandler))
 	m.Get("/admin/location/add", http.HandlerFunc(addLocationHandler))
 	m.Post("/admin/location/add", http.HandlerFunc(addLocationHandler))
 	m.Get("/admin/location", http.HandlerFunc(locationHandler))
