@@ -1,3 +1,9 @@
 User-agent: *
+Crawl-delay: 10
 Disallow: /admin/*
+
+User-agent: AdvBot
+Disallow: /
+
+User-agent: *
 Allow: /
