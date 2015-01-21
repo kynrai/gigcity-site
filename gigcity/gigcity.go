@@ -181,7 +181,7 @@ func cocHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var organizers []Organizer
-	organizers = append(organizers, Organizer{Name: "Adam Jimerson", Role: "Lead Organizer", Email: "vendion@gmail.com", GooglePlus: "https://google.com/+AdamJimerson", IRC: "vendion"})
+	organizers = append(organizers, Organizer{Name: "Adam Jimerson", Role: "Lead Community Organizer", Email: "vendion@gmail.com", GooglePlus: "https://google.com/+AdamJimerson", IRC: "vendion"})
 
 	page := template.Must(template.ParseFiles(
 		"static/_base.html",
