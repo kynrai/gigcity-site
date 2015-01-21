@@ -1,5 +1,5 @@
 application: gdg-gigcity
-version: 1b
+version: 1c
 runtime: go
 api_version: go1
 
