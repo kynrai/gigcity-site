@@ -2,3 +2,7 @@ $base-fonts: 'Roboto', 'Helvetica Neue', Helvetica, Arial
 
 body
   font-family: $base-fonts, sans-serif
+
+h4
+  img
+    margin-right: 10px
